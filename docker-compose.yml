@@ -16,13 +16,16 @@ services:
       - echo-db
 
   echo-db:
-    container_name: "echo-db"
+    container_name: ${POSTGRES_DB_NAME}
     image: postgres:14
     restart: always
     tty: true
     ports:
       - "5432:5432"
+    volumes:
+      - ./postgres:/data/echo-postgres
+
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}

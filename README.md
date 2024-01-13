@@ -28,17 +28,16 @@ This makes it super easy to replace each layer. (also good for testing)
 <br />
 
 ## 👟 How to run
-Install.
-```shell
-git clone git@github.com:zett-8/go-clean-echo.git
-
-cd go-clean-echo
-```
-
 Download dependencies.
 ```shell
 go mod download
 ```
+
+(Optional) Add the following to your `go.mod` file if you want it to work with local packages.
+```
+replace github.com/zett-8/go-clean-echo => ./
+```
+Then run `go install`.
 
 Fill out auth0 config to run with JWT authentication. Or simply disable JWT middleware
 ```go

@@ -1,6 +1,10 @@
 package main
 
 import (
+	"flag"
+	"log"
+	"os"
+
 	database "github.com/zett-8/go-clean-echo/db"
 	_ "github.com/zett-8/go-clean-echo/docs"
 	"github.com/zett-8/go-clean-echo/handlers"
@@ -9,11 +13,20 @@ import (
 	"github.com/zett-8/go-clean-echo/services"
 	"github.com/zett-8/go-clean-echo/stores"
 	"go.uber.org/zap"
-	"log"
-	"os"
 )
 
-var GO_ENV = os.Getenv("GO_ENV")
+var goEnv = os.Getenv("GO_ENV")
+
+var envName = os.Getenv("MY_NAME_ENV_VAR")
+var postgresDbName string
+
+func initArgv() {
+	var postgresDbName string
+
+	flag.StringVar(&postgresDbName, "postgresDbName", os.Getenv("postgresDbName"), "Specify a postgresDbName")
+
+	flag.Parse()
+}
 
 // @title Go clean echo API v1
 // @version 1.0
@@ -24,12 +37,14 @@ var GO_ENV = os.Getenv("GO_ENV")
 // @BasePath /
 // @schemes http
 func main() {
+	initArgv()
+
 	err := logger.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err := database.New(GO_ENV == "development")
+	db, err := database.New(goEnv == "development")
 	if err != nil {
 		logger.Fatal("failed to connect to the database", zap.Error(err))
 	}

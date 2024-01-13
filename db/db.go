@@ -3,13 +3,18 @@ package db
 import (
 	"database/sql"
 	"embed"
+	"io/ioutil"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/lib/pq"
 	migrate "github.com/rubenv/sql-migrate"
 	"github.com/zett-8/go-clean-echo/logger"
 	"go.uber.org/zap"
-	"io/ioutil"
 )
+
+type DBConfig struct {
+	postgresDbName string
+}
 
 //go:embed migrations/*.sql
 var migrationsFS embed.FS

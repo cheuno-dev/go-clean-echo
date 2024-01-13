@@ -4,7 +4,6 @@ FROM golang:1.18-alpine as base
 
 ARG PORT
 ENV PORT=$PORT
-ENV GO_ENV=development
 
 WORKDIR /go/app/base
 

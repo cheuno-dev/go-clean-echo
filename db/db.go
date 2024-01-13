@@ -6,28 +6,40 @@ import (
 	"io/ioutil"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	// Importing the "github.com/lib/pq" package for its side effects.
+	// This package registers the PostgreSQL driver with the database/sql package.
+	// The blank identifier (_) is used to import the package solely for its side effects.
+	// It is a common practice to import packages solely for their side effects.
 	_ "github.com/lib/pq"
 	migrate "github.com/rubenv/sql-migrate"
 	"github.com/zett-8/go-clean-echo/logger"
 	"go.uber.org/zap"
 )
 
-type DBConfig struct {
-	postgresDbName string
+// Config represents the configuration for the database.
+type Config struct {
+	// PostgresURI is the postgres connection string.
+	PostgresURI string
+
+	// PostgresMaxIdleConnections is the maximum number of connections in the idle connection pool.
+	PostgresMaxIdleConnections int
+
+	// PostgresMaxOpenConnections is the maximum number of open connections to the database.
+	PostgresMaxOpenConnections int
+
+	// SeedTestData is a flag to seed the database with test data.
+	SeedTestData bool
 }
 
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
-func New(development bool) (*sql.DB, error) {
-	var uri string
-	if development {
-		uri = "postgres://postgres:postgres@echo-db:5432/postgres?sslmode=disable"
-	} else {
-		uri = "postgres://postgres:postgres@echo-db:5432/postgres?sslmode=disable"
-	}
+// New creates a new database connection based on the provided configuration.
+func New(dbConfig *Config) (*sql.DB, error) {
+	db, err := sql.Open("postgres", dbConfig.PostgresURI)
 
-	db, err := sql.Open("postgres", uri)
+	logger.Info("connecting to the database", zap.String("postgresURI", dbConfig.PostgresURI))
+
 	if err != nil {
 		return nil, err
 	}
@@ -41,8 +53,7 @@ func New(development bool) (*sql.DB, error) {
 		return nil, err
 	}
 
-	// Run all seed sql file if on dev
-	if development {
+	if dbConfig.SeedTestData {
 		seedFiles, err := ioutil.ReadDir("db/seed/")
 		if err != nil {
 			logger.Error("failed to read seed files", zap.Error(err))
@@ -73,6 +84,7 @@ func New(development bool) (*sql.DB, error) {
 	return db, nil
 }
 
+// Mock creates a mock database connection and returns the database and mock object.
 func Mock() (*sql.DB, sqlmock.Sqlmock) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 

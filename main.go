@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/zett-8/go-clean-echo/db"
 	database "github.com/zett-8/go-clean-echo/db"
 	_ "github.com/zett-8/go-clean-echo/docs"
 	"github.com/zett-8/go-clean-echo/handlers"
@@ -17,13 +18,13 @@ import (
 
 var goEnv = os.Getenv("GO_ENV")
 
-var envName = os.Getenv("MY_NAME_ENV_VAR")
-var postgresDbName string
+func initArgv(dbConfig *db.Config) {
+	isDev := os.Getenv("GO_ENV") == "development"
 
-func initArgv() {
-	var postgresDbName string
+	// -------------- DB --------------
+	flag.StringVar(&dbConfig.PostgresURI, "postgresURI", os.Getenv("POSTGRES_URI"), "Specify a URI for Postgres")
 
-	flag.StringVar(&postgresDbName, "postgresDbName", os.Getenv("postgresDbName"), "Specify a postgresDbName")
+	flag.BoolVar(&dbConfig.SeedTestData, "seedTestData", isDev, "Should seed test data")
 
 	flag.Parse()
 }
@@ -37,14 +38,16 @@ func initArgv() {
 // @BasePath /
 // @schemes http
 func main() {
-	initArgv()
-
 	err := logger.New()
+
+	var dbConfig db.Config
+	initArgv(&dbConfig)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err := database.New(goEnv == "development")
+	db, err := database.New(&dbConfig)
 	if err != nil {
 		logger.Fatal("failed to connect to the database", zap.Error(err))
 	}

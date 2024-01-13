@@ -13,7 +13,7 @@ services:
     volumes:
       - .:/go/app/base
     depends_on:
-     - echo-db
+      - echo-db
 
   echo-db:
     container_name: "echo-db"
@@ -22,8 +22,6 @@ services:
     tty: true
     ports:
       - "5432:5432"
-    volumes:
-      - ./postgres:/data/echo-postgres
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
